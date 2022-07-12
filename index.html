@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <template id="myTemplate">
+    <style>
+      :host {
+        display: block;
+        background: red;
+      }
+
+      :defined {
+        font-style: italic;
+      }
+    </style>
+    <h1 id="title"></h1>
+    <slot></slot>
+  </template>
+  <my-component id="myComponent" title="这是大标题">
+    <h2>这是副标题</h2>
+  </my-component>
+</body>
+
+<script>
+  class MyComponent extends HTMLElement {
+    constructor() {
+      super();
+      const template = document.querySelector("#myTemplate");
+      const content = template.content.cloneNode(true);
+      const shadowRoot = this.attachShadow({ mode: 'open' })
+      const title = content.querySelector("#title");
+      this.$title = title
+      title.innerText = this.getAttribute("title");
+
+      // title.addEventListener('click', () => {
+      //   this.dispatchEvent(new CustomEvent('myEvent', {
+      //     detail: '这是子组件传过来的消息'
+      //   }))
+      // })
+
+      document.querySelector('#myComponent').addEventListener('click', e => {
+        e.target.setAttribute('title', '传入的标题被修改了')
+      })
+
+      shadowRoot.appendChild(content);
+    }
+
+    static get observedAttributes() {
+      return ['title']
+    }
+
+    attributeChangedCallback() {
+      const propTitle = this.getAttribute('title')
+      this.$title.innerText = propTitle
+    }
+
+  }
+
+  window.customElements.define('my-component', MyComponent)
+</script>
+
+</html>
